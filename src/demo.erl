@@ -36,6 +36,9 @@ opts() ->
 start() ->
     Stream = "demo_" ++ integer_to_list(erlang:system_time(millisecond)),
 
+    Writer_pool_size = application:get_env(demo, writer_pool_size, 256),
+    io:format("Writer_pool_size: ~p~n", [Writer_pool_size]),
+
     _ = application:ensure_all_started(hstreamdb_erl),
 
     Client = client(),
@@ -52,7 +55,9 @@ start() ->
         {stream, Stream},
         % {callback, {producer_example, callback}},
         {max_records, 1},
-        {interval, 1}
+        {interval, 5},
+        {buffer_pool_size, 8},
+        {writer_pool_size, Writer_pool_size}
     ],
     Producer = test_producer,
     {ok, test_producer} = hstreamdb:start_producer(Client, Producer, ProducerOptions),
